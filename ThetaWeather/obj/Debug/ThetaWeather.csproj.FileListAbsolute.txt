@@ -1,0 +1,7 @@
+C:\Ron\Projects\ThetaWeather\ThetaWeather\bin\Debug\ThetaWeather.exe.config
+C:\Ron\Projects\ThetaWeather\ThetaWeather\bin\Debug\ThetaWeather.exe
+C:\Ron\Projects\ThetaWeather\ThetaWeather\bin\Debug\ThetaWeather.pdb
+C:\Ron\Projects\ThetaWeather\ThetaWeather\obj\Debug\ThetaWeather.csproj.AssemblyReference.cache
+C:\Ron\Projects\ThetaWeather\ThetaWeather\obj\Debug\ThetaWeather.csproj.CoreCompileInputs.cache
+C:\Ron\Projects\ThetaWeather\ThetaWeather\obj\Debug\ThetaWeather.exe
+C:\Ron\Projects\ThetaWeather\ThetaWeather\obj\Debug\ThetaWeather.pdb
