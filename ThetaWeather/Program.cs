@@ -14,7 +14,7 @@ namespace ThetaWeather
         static void Main(string[] args)
         {
             StreamReader oReader = new StreamReader("..\\..\\Files\\weather.txt", Encoding.UTF8);
-            string inputLine = "";
+            string sInputLine = "";
             string sPreContent = "";
 
             bool bAppendLine = false;
@@ -22,27 +22,27 @@ namespace ThetaWeather
             int lTableColumnsTxtIndex = -1;
             int lLoopIndex = 0;
             //RL: Loop through each line of the txt file
-            while ((inputLine = oReader.ReadLine()) != null)
+            while ((sInputLine = oReader.ReadLine()) != null)
             {
-                if (bAppendLine && !inputLine.Trim().StartsWith("</") && inputLine.Trim() != "")
+                if (bAppendLine && !sInputLine.Trim().StartsWith("</") && sInputLine.Trim() != "")
                 {
                    
-                    sPreContent += inputLine + "\n";
+                    sPreContent += sInputLine + "\n";
 
                     //RL: We are reading the table headers
-                    if (inputLine.Trim().StartsWith("Dy")) //RL: There is an assumption here that the first table column is 'Dy'. If the feed from API changes, this will need to change. We can set this as a config so we don't change the code each time this changes.
+                    if (sInputLine.Trim().StartsWith("Dy")) //RL: There is an assumption here that the first table column is 'Dy'. If the feed from API changes, this will need to change. We can set this as a config so we don't change the code each time this changes.
                     {
                         lTableColumnsTxtIndex = lLoopIndex;
-                        var cols = inputLine.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                        var cols = sInputLine.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
 
                         for (int col = 0; col < cols.Length; col++)
                             dtWeather.Columns.Add(new DataColumn(cols[col]));
 
-                    } else if (lTableColumnsTxtIndex > -1 && lLoopIndex > lTableColumnsTxtIndex)
+                    } else if (lTableColumnsTxtIndex > -1 && lLoopIndex > lTableColumnsTxtIndex) //RL: this condition satisfies for all actual data table rows in the text file
                     {
-                        var colValues = inputLine.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                        var colValues = sInputLine.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
 
-                        bool bAddline = true;
+                        bool bAddline = true; //RL: Flag 
                         Double dblNumber = 0;
                         DataRow dr = dtWeather.NewRow();
                         for (int i = 0; i < colValues.Length; i++)
@@ -56,9 +56,12 @@ namespace ThetaWeather
                             if (i < 3) //RL: We were given information that the first 3 columns are what we needed and that they are of number type
                             {
                                 double dblColVal = 0;
-                                if (Double.TryParse(colValues[i].Replace("*",""), out dblColVal))
+                                if (Double.TryParse(colValues[i].Replace("*",""), out dblColVal)) //RL: At this point we are making sure we insert a value of number type
                                 {
                                     dr[i] = dblColVal;
+                                } else //RL: If it is not of number type then it must be dirty data - we exclude it
+                                {
+                                    bAddline = false;
                                 }
                             } else
                             {
@@ -67,11 +70,12 @@ namespace ThetaWeather
                             
                         }
                         
+                        //RL: If row is not dirty data then we append it.
                         if (bAddline) dtWeather.Rows.Add(dr);
                     }
                 }
 
-                if (inputLine.Trim().StartsWith("<"))
+                if (sInputLine.Trim().StartsWith("<"))
                 {
 
                     if (bAppendLine)    //RL: Condition is true when we get to the closing tag
@@ -81,18 +85,19 @@ namespace ThetaWeather
                     else //RL: Condition is true when we get to the opening tag
                     {
                         bAppendLine = true;
-                        //sPreContent += inputLine + "\n";
                     }
 
                 }
                 lLoopIndex++;
             }
 
+            //RL: At this point our datatable is ready
             var sDayWithLeastTempDifference = dtWeather.Select()
-                .OrderBy(row => Double.Parse(row.Field<string>("MxT")) - Double.Parse(row.Field<string>("MnT")))
-                .FirstOrDefault()["Dy"].ToString();
+                .OrderBy(row => Double.Parse(row.Field<string>("MxT")) - Double.Parse(row.Field<string>("MnT"))) //RL: Order by the difference of Max and Min Temp
+                .FirstOrDefault()["Dy"].ToString(); //RL: The day with the least difference will be at the top most row
 
-            Console.Write("Day with the least temperature difference is: day " + sDayWithLeastTempDifference);
+            //RL: Write the result we want to see
+            Console.WriteLine("Day with the least temperature difference is: day " + sDayWithLeastTempDifference);
             Console.ReadLine();
         }
     }
